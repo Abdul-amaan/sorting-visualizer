@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sorting Visualizer</title>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+      .bar {
+        transition: height 0.3s, background-color 0.3s;
+        margin-right: 4px;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <!-- Sorting Visualizer Container -->
+    <div class="container mx-auto px-4 py-8">
+      <h1 class="text-3xl font-bold text-center mb-6">Sorting Visualizer</h1>
+      <!-- Controls -->
+      <div class="flex justify-center items-center space-x-4 mb-6">
+        <select id="algorithm" class="p-2 border rounded">
+          <option value="selectionSort">Selection Sort</option>
+          <option value="bubbleSort">Bubble Sort</option>
+          <option value="insertionSort">Insertion Sort</option>
+        </select>
+        <button
+          id="sort"
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Sort
+        </button>
+        <button
+          id="generateArray"
+          class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Generate New Array
+        </button>
+      </div>
+      <div
+        id="bars"
+        class="flex justify-center items-end h-64 bg-white border p-4 rounded"
+      ></div>
+    </div>
+
+    <script>
+      $(document).ready(function () {
+        const arraySize = 15;
+        let array = [];
+
+        // Generate random array
+        function generateArray() {
+          $("#bars").empty();
+          array = [];
+          for (let i = 0; i < arraySize; i++) {
+            array.push(Math.floor(Math.random() * 100) + 1);
+            $("#bars").append(
+              `<div class="bar bg-blue-500" style="width: 20px; height: ${array[i]}%;"></div>`
+            );
+          }
+        }
+
+        // Sorting algorithms
+        async function selectionSort() {
+          for (let i = 0; i < array.length; i++) {
+            let minIndex = i;
+            for (let j = i + 1; j < array.length; j++) {
+              if (array[j] < array[minIndex]) {
+                minIndex = j;
+              }
+            }
+            await swap(i, minIndex);
+          }
+        }
+
+        async function bubbleSort() {
+          for (let i = 0; i < array.length; i++) {
+            for (let j = 0; j < array.length - i - 1; j++) {
+              if (array[j] > array[j + 1]) {
+                await swap(j, j + 1);
+              }
+            }
+          }
+        }
+
+        async function insertionSort() {
+          for (let i = 1; i < array.length; i++) {
+            let key = array[i];
+            let j = i - 1;
+            while (j >= 0 && array[j] > key) {
+              array[j + 1] = array[j];
+              await swap();
+              j = j - 1;
+            }
+            array[j + 1] = key;
+            await updateBars();
+          }
+        }
+
+        function swap(i, j) {
+          return new Promise((resolve) => {
+            // Highlight bars being swapped
+            $(".bar").eq(i).css("background-color", "red");
+            $(".bar").eq(j).css("background-color", "red");
+
+            let temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+            updateBars();
+
+            setTimeout(() => {
+              $(".bar").eq(i).css("background-color", "green");
+              $(".bar").eq(j).css("background-color", "green");
+              resolve();
+            }, 300);
+          });
+        }
+        function updateBars() {
+          $(".bar").each(function (index) {
+            $(this).css("height", `${array[index]}%`);
+          });
+        }
+
+        // Event listeners onclick functions
+        $("#sort").click(function () {
+          const algorithm = $("#algorithm").val();
+          switch (algorithm) {
+            case "selectionSort":
+              selectionSort();
+              break;
+            case "bubbleSort":
+              bubbleSort();
+              break;
+            case "insertionSort":
+              insertionSort();
+              break;
+          }
+        });
+        $("#generateArray").click(function () {
+          generateArray();
+        });
+        // Initialize array
+        generateArray();
+      });
+    </script>
+  </body>
+</html>
